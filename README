@@ -1,3 +1,6 @@
-Compile with
-% g++ lazy-random.cpp -lcrypto++
+Required libraries:
+    >=crypto++-5.5 (http://www.cryptopp.com/)
+
+Compile with:
+    % g++ lazy-random.cpp -lcrypto++
 

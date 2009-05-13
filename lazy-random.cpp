@@ -41,7 +41,7 @@ int main()
   AES::Encryption aesEncryption(key, AES::MAX_KEYLENGTH);
 
   /* Initialize the counter to an arbitrary value */
-  std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
+  std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
   
   while(true) {
     std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);

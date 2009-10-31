@@ -30,14 +30,17 @@
  
 #include <iostream>
 
-#include "cryptopp/misc.h"
-#include "cryptopp/aes.h"
-#include "boost/thread.hpp"
+#include <cryptopp/misc.h>
+#include <cryptopp/aes.h>
+
+#include <boost/thread.hpp>
+#include <boost/program_options.hpp>
 
 using namespace CryptoPP;
-
+namespace bpo = boost::program_options;
 
 boost::mutex stdin_lock; 
+boost::mutex stdout_lock; 
 
 void worker ()
 {
@@ -62,19 +65,45 @@ void worker ()
         IncrementCounterByOne(counter,AES::BLOCKSIZE);
         aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
       }
-      /* Are concurrent writes a performance issue? */
-      std::cout.write(reinterpret_cast<char*>(junk),1024);  
+      {
+        boost::mutex::scoped_lock lock(stdout_lock);
+        std::cout.write(reinterpret_cast<char*>(junk),1024);  
+      }
     }
   }
 }
 
-int main()
+
+int main(int argc, char** argv)
 {
-  // <-- TODO.
-  int number = 2;
+  int no_of_threads;
+
+  bpo::options_description desc("Allowed options");
+  desc.add_options()
+    ( "threads", 
+      bpo::value<int>(&no_of_threads)->default_value(1),
+      "Number of threads. Allowed range is 0-255.\n"
+       "By default one thread will be spawned.");
+
+  try {
+    bpo::variables_map vm;
+    bpo::store (bpo::parse_command_line(argc, argv, desc), vm);
+    bpo::notify(vm);
+  } catch (...) {
+    std::cerr << "\nlazy-random Version: 0.2"
+              << "\nCopyright (C) 2009 Matthias Maier "
+                  "<tamiko@kyomu.43-1.org>\n\n"
+              << desc;
+    return 1;
+  }
+
+  if (no_of_threads < 0 || no_of_threads > 255) {
+    std::cerr <<"Invalid number of threads: " <<no_of_threads <<std::endl;
+    return 1;
+  }
 
   boost::thread_group my_group;
-  for (int i = 1; i <= number; i++)
+  for (int i = 1; i <= no_of_threads; i++)
     my_group.create_thread(worker);
   my_group.join_all();
 }

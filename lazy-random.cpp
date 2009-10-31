@@ -32,31 +32,52 @@
 
 #include "cryptopp/misc.h"
 #include "cryptopp/aes.h"
+#include "boost/thread.hpp"
 
 using namespace CryptoPP;
 
-int main()
+
+boost::mutex stdin_lock; 
+
+struct worker
 {
-  byte key[AES::MAX_KEYLENGTH], counter[AES::BLOCKSIZE], junk[1024];
-  AES::Encryption aesEncryption(key, AES::MAX_KEYLENGTH);
+  void operator()()
+  {
+    byte key[AES::MAX_KEYLENGTH], counter[AES::BLOCKSIZE], junk[1024];
+    AES::Encryption aesEncryption(key, AES::MAX_KEYLENGTH);
 
-  /* Initialize the counter to an arbitrary value */
-  std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
-  
-  while(true) {
-    std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
-    aesEncryption.SetKey(key, AES::MAX_KEYLENGTH);
-
-    for( int i = 0; i < 16*1024;i++) {
-      /* 1kb-Junks seem to be ideal. */
-      for (int j = 0; j < 1024/AES::BLOCKSIZE;j++) {
-        IncrementCounterByOne(counter,AES::BLOCKSIZE);
-        aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
+    /* Initialize the counter to an arbitrary value */
+    {
+      boost::mutex::scoped_lock lock(stdin_lock);
+      std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
+    }
+    while(true) {
+      {
+        boost::mutex::scoped_lock lock(stdin_lock);
+        std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
       }
-      std::cout.write(reinterpret_cast<char*>(junk),1024);  
+      aesEncryption.SetKey(key, AES::MAX_KEYLENGTH);
+
+      for( int i = 0; i < 16*1024;i++) {
+        /* 1kb-Junks seem to be ideal. */
+        for (int j = 0; j < 1024/AES::BLOCKSIZE;j++) {
+          IncrementCounterByOne(counter,AES::BLOCKSIZE);
+          aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
+        }
+        /* Are concurrent writes a performance issue? */
+        std::cout.write(reinterpret_cast<char*>(junk),1024);  
+      }
     }
   }
+};
 
-  return 0;
+int main()
+{
+  // <-- TODO.
+  int number = 2;
+
+  boost::thread_group my_group;
+  for (int i = 1; i <= number; i++)
+    my_group.create_thread(worker());
+  my_group.join_all();
 }
-

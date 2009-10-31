@@ -1,6 +1,7 @@
 Required libraries:
     >=crypto++-5.5 (http://www.cryptopp.com/)
+    >=boost-1.36
 
 Compile with:
-    % g++ lazy-random.cpp -lcrypto++
+    % g++ lazy-random.cpp -lcrypto++ -lboost_thread -olazy-random
 

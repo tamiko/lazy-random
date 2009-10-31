@@ -3,4 +3,4 @@ Required libraries:
     >=boost-1.36
 
 Compile with:
-    % g++ lazy-random.cpp -lcrypto++ -lboost_thread -lboost_program_options -olazy-random
+    % g++ lazy-random.cpp -lcrypto++ -lboost_thread-mt -lboost_program_options-mt -olazy-random

@@ -1,7 +1,7 @@
 /* 
  * lazy-random - a fast rng-pipe. 
  *
- * Copyright (C) 2009 Matthias Maier (matthias_maier@gmx.de) 
+ * Copyright (C) 2009 Matthias Maier <tamiko@kyomu.43-1.org> 
  * 
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -83,7 +83,8 @@ int main(int argc, char** argv)
     ( "threads", 
       bpo::value<int>(&no_of_threads)->default_value(1),
       "Number of threads. Allowed range is 0-255.\n"
-       "By default one thread will be spawned.");
+       "By default one thread will be spawned.")
+    ;
 
   try {
     bpo::variables_map vm;
@@ -98,7 +99,8 @@ int main(int argc, char** argv)
   }
 
   if (no_of_threads < 0 || no_of_threads > 255) {
-    std::cerr <<"Invalid number of threads: " <<no_of_threads <<std::endl;
+    std::cerr << "Invalid number of threads: " << no_of_threads
+              << std::endl;
     return 1;
   }
 

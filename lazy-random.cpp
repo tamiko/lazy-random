@@ -36,39 +36,32 @@
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 
+#define REKEYSIZE (16*1024*1024)
+#define JUNKSIZE (1024)
+
 using namespace CryptoPP;
 namespace bpo = boost::program_options;
 
-boost::mutex stdin_lock; 
-boost::mutex stdout_lock; 
-
 void worker ()
 {
-  byte key[AES::MAX_KEYLENGTH], counter[AES::BLOCKSIZE], junk[1024];
+  byte key[AES::MAX_KEYLENGTH], counter[AES::BLOCKSIZE], junk[JUNKSIZE];
   AES::Encryption aesEncryption(key, AES::MAX_KEYLENGTH);
 
   /* Initialize the counter to an arbitrary value */
-  {
-    boost::mutex::scoped_lock lock(stdin_lock);
-    std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
-  }
+  std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
+
   while(true) {
-    {
-      boost::mutex::scoped_lock lock(stdin_lock);
-      std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
-    }
+
+    std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
     aesEncryption.SetKey(key, AES::MAX_KEYLENGTH);
 
-    for( int i = 0; i < 16*1024;i++) {
-      /* 1kb-Junks seem to be ideal. */
-      for (int j = 0; j < 1024/AES::BLOCKSIZE;j++) {
+    for( int i = 0; i < REKEYSIZE/JUNKSIZE;i++) {
+      for (int j = 0; j < JUNKSIZE/AES::BLOCKSIZE;j++) {
         IncrementCounterByOne(counter,AES::BLOCKSIZE);
         aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
       }
-      {
-        boost::mutex::scoped_lock lock(stdout_lock);
-        std::cout.write(reinterpret_cast<char*>(junk),1024);  
-      }
+
+      std::cout.write(reinterpret_cast<char*>(junk),JUNKSIZE);  
     }
   }
 }

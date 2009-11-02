@@ -36,8 +36,10 @@
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 
+/* REKEYSIZE has to be a multiple of JUNKSIZE */
 #define REKEYSIZE (16*1024*1024)
-#define JUNKSIZE (1024)
+/* JUNKSIZE has to be a multiple of AES::BLOCKSIZE */
+#define JUNKSIZE (1024*1024)
 
 using namespace CryptoPP;
 namespace bpo = boost::program_options;

@@ -1,3 +1,5 @@
+#define CRYPTOPP_DISABLE_ASM
+
 /* 
  * lazy-random - a fast rng-pipe. 
  *
@@ -51,8 +53,9 @@ void worker ()
 
   /* Initialize the counter to an arbitrary value */
   std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
+  std::cout.exceptions(std::ostream::failbit | std::ostream::badbit);
 
-  while(true) {
+  for(;;) {
 
     std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
     aesEncryption.SetKey(key, AES::MAX_KEYLENGTH);

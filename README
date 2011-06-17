@@ -1,6 +1,15 @@
-Required libraries:
-    >=crypto++-5.5 (http://www.cryptopp.com/)
-    >=boost-1.36
+lazy-random - a fast rng-pipe. 
 
-Compile with:
-    % g++ lazy-random.cpp -lcrypto++ -lboost_thread-mt -lboost_program_options-mt -olazy-random
+
+lazy-random generates cryptographical strong pseudo-random numbers using
+AES in counter-mode. 
+We have to care about the fact that in counter-mode no block-value will
+be repeated. So, to prevent statistical attacks, we rekey every 16Mb.
+
+For the rekeying-process it is assumed that cryptographical strong
+random numbers are available via stdin, e.g.
+
+  $ </dev/urandom lazy-random
+
+This program uses the crypto++-library (http://cryptopp.com). Thank you
+guys. You're awesome!

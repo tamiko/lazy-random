@@ -1,0 +1,17 @@
+Required libraries:
+  >=crypto++-5.6 (http://www.cryptopp.com/)
+  >=boost-1.36
+
+
+Compile lazy-random:
+  $ mkdir build
+  $ cd build
+  $ ccmake ../.
+  $ make
+    
+  The executable should be located at build/src/lazy-random.
+
+Install lazy-random:
+  Set up CMAKE_INSTALL_PREFIX at the ccmake phase.
+  run a final
+    $ make install

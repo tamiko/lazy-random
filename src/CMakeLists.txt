@@ -1,0 +1,6 @@
+SET(LAZY_RANDOM_SRC lazy-random.cpp)
+
+ADD_EXECUTABLE(lazy-random ${LAZY_RANDOM_SRC})
+TARGET_LINK_LIBRARIES(lazy-random ${LIBS})
+
+INSTALL(TARGETS lazy-random RUNTIME DESTINATION bin)

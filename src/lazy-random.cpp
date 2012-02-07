@@ -1,9 +1,9 @@
-/* 
- * lazy-random - a fast rng-pipe. 
+/*
+ * lazy-random - a fast rng-pipe.
  *
  * Copyright (C) 2009-2011 Matthias Maier <tamiko@kyomu.43-1.org>.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -27,9 +27,9 @@
  * DAMAGE.
  */
 
-/* 
+/*
  * lazy-random generates cryptographical strong pseudo-random numbers using
- * AES in counter-mode. 
+ * AES in counter-mode.
  * We have to care about the fact that in counter-mode no block-value will
  * be repeated. So, to prevent statistical attacks, we rekey every 16Mb.
  *
@@ -41,7 +41,7 @@
  * This program uses the crypto++-library (http://cryptopp.com). Thank you
  * guys. You're awesome!
  */
- 
+
 #include <iostream>
 
 #include "misc.h"
@@ -81,7 +81,7 @@ void worker ()
         aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
       }
 
-      std::cout.write(reinterpret_cast<char*>(junk),JUNKSIZE);  
+      std::cout.write(reinterpret_cast<char*>(junk),JUNKSIZE);
     }
   }
 }
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
   bpo::options_description desc("Allowed options");
   desc.add_options()
-    ( "threads", 
+    ( "threads",
       bpo::value<int>(&no_of_threads)->default_value(1),
       "Number of threads. Allowed range is 0-255.\n"
        "By default one thread will be spawned.")

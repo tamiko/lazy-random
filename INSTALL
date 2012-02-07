@@ -8,7 +8,7 @@ Compile lazy-random:
   $ cd build
   $ ccmake ../.
   $ make
-    
+
   The executable should be located at build/src/lazy-random.
 
 Install lazy-random:

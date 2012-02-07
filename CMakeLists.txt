@@ -1,6 +1,6 @@
 PROJECT (lazy-random)
 set (VERSION "0.3")
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8) 
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 ######################
 ## Set up libraries ##

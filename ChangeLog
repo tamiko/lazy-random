@@ -1,3 +1,7 @@
+v0.4:
+      - CMake cleanup
+      - fix linkage with boost
+
 v0.3:
       - Switch to a 2 clause BSD license
-      - Switch to cmake
+      - Switch to CMake

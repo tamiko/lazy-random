@@ -1,6 +1,12 @@
-SET(LAZY_RANDOM_SRC lazy-random.cpp)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} ${Crypto++_INCLUDE_DIR})
 
-ADD_EXECUTABLE(lazy-random ${LAZY_RANDOM_SRC})
-TARGET_LINK_LIBRARIES(lazy-random ${LIBS})
+ADD_EXECUTABLE(lazy-random lazy-random.cpp)
+
+TARGET_LINK_LIBRARIES(lazy-random
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY}
+  ${Crypto++_LIBRARY}
+  )
 
 INSTALL(TARGETS lazy-random RUNTIME DESTINATION bin)

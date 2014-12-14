@@ -1,7 +1,7 @@
 /*
  * lazy-random - a fast rng-pipe.
  *
- * Copyright (C) 2009-2011 Matthias Maier <tamiko@kyomu.43-1.org>.
+ * Copyright (C) 2009 - 2014 Matthias Maier <tamiko@kyomu.43-1.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,8 +104,8 @@ int main(int argc, char** argv)
     bpo::store (bpo::parse_command_line(argc, argv, desc), vm);
     bpo::notify(vm);
   } catch (...) {
-    std::cerr << "\nlazy-random Version: 0.2"
-              << "\nCopyright (C) 2009 Matthias Maier "
+    std::cerr << "\nlazy-random Version: 0.4"
+              << "\nCopyright (C) 2009 - 2014 Matthias Maier "
                   "<tamiko@kyomu.43-1.org>\n\n"
               << desc;
     return 1;

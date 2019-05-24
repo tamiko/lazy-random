@@ -3,9 +3,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} ${Crypto++_INCLUDE_DIR})
 ADD_EXECUTABLE(lazy-random lazy-random.cpp)
 
 TARGET_LINK_LIBRARIES(lazy-random
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_LIBRARIES}
   ${Crypto++_LIBRARY}
   )
 

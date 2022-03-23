@@ -1,15 +1,11 @@
-lazy-random - a fast rng-pipe.
-
+lazy-random - a fast random number generator.
 
 lazy-random generates cryptographical strong pseudo-random numbers using
-AES in counter-mode.
-We have to care about the fact that in counter-mode no block-value will
-be repeated. So, to prevent statistical attacks, we rekey every 16Mb.
+the ChaCha20 stream cipher. In order to provide some mild forward secrecy
+we use the "fast key erasure" [1] technique every 64KiB and rekey
+completely from /dev/urandom every 1GiB.
 
-For the rekeying-process it is assumed that cryptographical strong
-random numbers are available via stdin, e.g.
+[1] https://blog.cr.yp.to/20170723-random.html
 
-  $ </dev/urandom lazy-random
-
-This program uses the crypto++-library (http://cryptopp.com). Thank you
+This program uses the crypto++-library (https://cryptopp.com). Thank you
 guys. You're awesome!

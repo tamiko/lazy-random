@@ -1,7 +1,7 @@
 /*
- * lazy-random - a fast rng-pipe.
+ * lazy-random - a fast random number generator.
  *
- * Copyright (C) 2009 - 2015 Matthias Maier <tamiko@kyomu.43-1.org>.
+ * Copyright (C) 2009 - 2022 Matthias Maier <tamiko@kyomu.43-1.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,91 +29,84 @@
 
 /*
  * lazy-random generates cryptographical strong pseudo-random numbers using
- * AES in counter-mode.
- * We have to care about the fact that in counter-mode no block-value will
- * be repeated. So, to prevent statistical attacks, we rekey every 16Mb.
+ * the ChaCha20 stream cipher. In order to provide some mild forward
+ * secrecy we use the "fast key erasure" [1] technique every 64KiB and
+ * rekey completely from /dev/urandom every 1GiB.
  *
- * For the rekeying-process it is assumed that cryptographical strong
- * random numbers are available via stdin, e.g.
+ * [1] https://blog.cr.yp.to/20170723-random.html
  *
- *   $ </dev/urandom lazy-random
- *
- * This program uses the crypto++-library (http://cryptopp.com). Thank you
+ * This program uses the crypto++-library (https://cryptopp.com). Thank you
  * guys. You're awesome!
  */
 
+#include <fstream>
 #include <iostream>
 
-#include "misc.h"
-#include "aes.h"
+#include "chacha.h"
+#include "osrng.h"
+#include "secblock.h"
 
-#include "boost/thread.hpp"
 #include "boost/program_options.hpp"
+#include "boost/thread.hpp"
 
-/* REKEYSIZE has to be a multiple of JUNKSIZE */
-#define REKEYSIZE (16*1024*1024)
-/* JUNKSIZE has to be a multiple of AES::BLOCKSIZE */
-#define JUNKSIZE (1024*1024)
-
-/* Some workaround ... */
-#define CRYPTOPP_DISABLE_ASM
+#define CHUNKSIZE (64 * 1024)          // fast key erasure every 64KiB
+#define REKEYSIZE (1024 * 1024 * 1024) // complete rekey every 1GiB
+static_assert(REKEYSIZE % CHUNKSIZE == 0,
+              "REKEYSIZE has to be a multiple of CHUNKSIZE");
 
 using namespace CryptoPP;
 namespace bpo = boost::program_options;
 
-void worker ()
-{
-  byte key[AES::MAX_KEYLENGTH], counter[AES::BLOCKSIZE], junk[JUNKSIZE];
-  AES::Encryption aesEncryption(key, AES::MAX_KEYLENGTH);
 
-  /* Initialize the counter to an arbitrary value */
-  std::cin.read(reinterpret_cast<char*>(counter),AES::BLOCKSIZE);
+void worker()
+{
+  SecByteBlock key(32), iv(8);
+  ChaCha::Encryption enc;
+
+  SecByteBlock chunk(CHUNKSIZE), zeroes(CHUNKSIZE);
+  zeroes.Assign(CHUNKSIZE, 0);
+
   std::cout.exceptions(std::ostream::failbit | std::ostream::badbit);
 
-  for(;;) {
+  for (;;) {
+    // reseed from /dev/urandom:
+    OS_GenerateRandomBlock(false, key, key.size());
+    OS_GenerateRandomBlock(false, iv, iv.size());
 
-    std::cin.read(reinterpret_cast<char*>(key),AES::MAX_KEYLENGTH);
-    aesEncryption.SetKey(key, AES::MAX_KEYLENGTH);
-
-    for( int i = 0; i < REKEYSIZE/JUNKSIZE;i++) {
-      for (int j = 0; j < JUNKSIZE/AES::BLOCKSIZE;j++) {
-        IncrementCounterByOne(counter,AES::BLOCKSIZE);
-        aesEncryption.ProcessBlock(counter,&junk[j*AES::BLOCKSIZE]);
-      }
-
-      std::cout.write(reinterpret_cast<char*>(junk),JUNKSIZE);
+    for (std::size_t i = 0; i < REKEYSIZE / CHUNKSIZE; ++i) {
+      enc.SetKeyWithIV(key, key.size(), iv, iv.size());
+      enc.ProcessData(key, zeroes, key.size()); /* fast key erasure */
+      enc.ProcessData(chunk, zeroes, chunk.size());
+      std::cout.write(reinterpret_cast<char *>(chunk.data()), CHUNKSIZE);
     }
   }
 }
 
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   int no_of_threads;
 
   bpo::options_description desc("Allowed options");
-  desc.add_options()
-    ( "threads",
-      bpo::value<int>(&no_of_threads)->default_value(1),
-      "Number of threads. Allowed range is 0-255.\n"
-       "By default one thread will be spawned.")
-    ;
+  desc.add_options()("threads",
+                     bpo::value<int>(&no_of_threads)->default_value(1),
+                     "Number of threads. Allowed range is 0-255.\n"
+                     "By default one thread will be spawned.");
 
   try {
     bpo::variables_map vm;
-    bpo::store (bpo::parse_command_line(argc, argv, desc), vm);
+    bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
     bpo::notify(vm);
   } catch (...) {
     std::cerr << "\nlazy-random Version: 0.5"
               << "\nCopyright (C) 2009 - 2015 Matthias Maier "
-                  "<tamiko@kyomu.43-1.org>\n\n"
+                 "<tamiko@kyomu.43-1.org>\n\n"
               << desc;
     return 1;
   }
 
   if (no_of_threads < 0 || no_of_threads > 255) {
-    std::cerr << "Invalid number of threads: " << no_of_threads
-              << std::endl;
+    std::cerr << "Invalid number of threads: " << no_of_threads << std::endl;
     return 1;
   }
 

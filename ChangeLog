@@ -1,5 +1,7 @@
 v0.6:
       - update CMake files
+      - switch to ChaCha20 and fast key erasure
+      - automatically open /dev/urandom
 
 v0.5:
       - Update copyright notice

@@ -1,10 +1,10 @@
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} ${Crypto++_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR} ${Crypto++_INCLUDE_DIR})
 
-ADD_EXECUTABLE(lazy-random lazy-random.cpp)
+add_executable(lazy-random lazy-random.cpp)
 
-TARGET_LINK_LIBRARIES(lazy-random
+target_link_libraries(lazy-random
   ${Boost_LIBRARIES}
   ${Crypto++_LIBRARY}
   )
 
-INSTALL(TARGETS lazy-random RUNTIME DESTINATION bin)
+install(TARGETS lazy-random RUNTIME DESTINATION bin)

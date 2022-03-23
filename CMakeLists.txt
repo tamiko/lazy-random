@@ -1,14 +1,14 @@
-PROJECT (lazy-random)
-set (VERSION "0.5")
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+project(lazy-random)
+set(VERSION "0.6")
+cmake_minimum_required(VERSION 3.3)
 
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
-FIND_PACKAGE (Boost COMPONENTS thread program_options system REQUIRED)
-FIND_PACKAGE (Crypto++ REQUIRED)
+find_package(Boost COMPONENTS thread program_options system REQUIRED)
+find_package(Crypto++ REQUIRED)
 
-ADD_SUBDIRECTORY(src)
+add_subdirectory(src)
 
-INSTALL (FILES ChangeLog COPYING INSTALL README
+install(FILES ChangeLog COPYING INSTALL README
   DESTINATION share/doc/lazy-random-${VERSION}
   )

@@ -98,9 +98,9 @@ int main(int argc, char **argv)
     bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
     bpo::notify(vm);
   } catch (...) {
-    std::cerr << "\nlazy-random Version: 0.5"
-              << "\nCopyright (C) 2009 - 2015 Matthias Maier "
-                 "<tamiko@kyomu.43-1.org>\n\n"
+    std::cerr << "\nlazy-random Version: 0.6"
+              << "\nCopyright (C) 2009 - 2022 Matthias Maier "
+                 "<tamiko@43-1.org>\n\n"
               << desc;
     return 1;
   }
